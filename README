@@ -1,3 +1,9 @@
+This is a demonstration of game ticking and drawing on a non-main thread.
+You shouldn't use this project. It contains ugly hacks and doesn't support everything FNA does.
+To run the demo you need MojoShader.dll, SDL2.dll and SDL2_image.dll from FNA. http://fna.flibitijibibo.com/archive/fnalibs.tar.bz2
+(Or download from this repo's releases section)
+
+Orignal README below:
 This is FNA, an XNA4 reimplementation that focuses solely on developing a fully
 accurate XNA4 runtime for the desktop.
 

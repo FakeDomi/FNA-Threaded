@@ -361,11 +361,13 @@ namespace Microsoft.Xna.Framework
 			suppressDraw = true;
 		}
 
-		public void RunOneFrame()
+        [Obsolete]
+        private void RunOneFrame()
 		{
 			if (!hasInitialized)
 			{
-				DoInitialize();
+                GameSubThread.Setup(this);
+                GameSubThread.Instance.ScheduleWait(DoInitialize);
 				gameTimer = Stopwatch.StartNew();
 				hasInitialized = true;
 			}
@@ -384,7 +386,8 @@ namespace Microsoft.Xna.Framework
 
 			if (!hasInitialized)
 			{
-				DoInitialize();
+                GameSubThread.Setup(this);
+                GameSubThread.Instance.ScheduleWait(DoInitialize);
 				hasInitialized = true;
 			}
 
@@ -392,6 +395,8 @@ namespace Microsoft.Xna.Framework
 			gameTimer = Stopwatch.StartNew();
 
 			FNAPlatform.RunLoop(this);
+
+            GameSubThread.Abort();
 
 			EndRun();
 

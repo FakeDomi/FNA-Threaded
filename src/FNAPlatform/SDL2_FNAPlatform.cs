@@ -855,11 +855,33 @@ namespace Microsoft.Xna.Framework
 			int[] textInputControlRepeat = new int[textInputCharacters.Length];
 			bool textInputSuppress = false;
 
+            GameSubThread.Instance.EnableTicking();
+
+            unsafe
+            {
+                SDL.SDL_AddEventWatch((data, eventPtr) =>
+                {
+                    SDL.SDL_Event* sdlEvent = (SDL.SDL_Event*) eventPtr;
+
+                    if (sdlEvent->type == SDL.SDL_EventType.SDL_WINDOWEVENT &&
+                        sdlEvent->window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
+                    {
+                        GameSubThread.Instance.ScheduleWait(() =>
+                        {
+                            ((FNAWindow) game.Window).INTERNAL_ClientSizeChanged();
+                            game.RedrawWindow();
+                        });
+                    }
+
+                    return 0;
+                }, game.Window.Handle); 
+            }
+
 			SDL.SDL_Event evt;
 
 			while (game.RunApplication)
 			{
-				while (SDL.SDL_PollEvent(out evt) == 1)
+				while (SDL.SDL_WaitEvent(out evt) == 1)
 				{
 					// Keyboard
 					if (evt.type == SDL.SDL_EventType.SDL_KEYDOWN)
@@ -1002,13 +1024,13 @@ namespace Microsoft.Xna.Framework
 							 */
 							if (GetWindowResizable(game.Window.Handle))
 							{
-								((FNAWindow) game.Window).INTERNAL_ClientSizeChanged();
+								GameSubThread.Instance.Schedule(() => ((FNAWindow) game.Window).INTERNAL_ClientSizeChanged());
 							}
 						}
 						else if (evt.window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_EXPOSED)
 						{
 							// This is typically called when the window is made bigger
-							game.RedrawWindow();
+							// game.RedrawWindow();
 						}
 
 						// Window Move
@@ -1123,7 +1145,7 @@ namespace Microsoft.Xna.Framework
 				}
 
 				Keyboard.SetKeys(keys);
-				game.Tick();
+				//game.Tick();
 			}
 
 			// Okay, we don't care about the events anymore
@@ -3069,7 +3091,7 @@ namespace Microsoft.Xna.Framework
 					if (	game.Window != null &&
 						evt->window.windowID == SDL.SDL_GetWindowID(game.Window.Handle)	)
 					{
-						game.RedrawWindow();
+						// game.RedrawWindow();
 						return 0;
 					}
 				}
