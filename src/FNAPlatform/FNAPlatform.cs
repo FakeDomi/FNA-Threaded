@@ -15,6 +15,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
+using SDL2;
+
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -79,6 +81,7 @@ namespace Microsoft.Xna.Framework
 			UpdateTouchPanelState =		SDL2_FNAPlatform.UpdateTouchPanelState;
 			GetNumTouchFingers =		SDL2_FNAPlatform.GetNumTouchFingers;
 			SupportsOrientationChanges =	SDL2_FNAPlatform.SupportsOrientationChanges;
+            ExitGame = SDL2_FNAPlatform.ExitGame;
 
 			// Don't overwrite application log hooks!
 			if (FNALoggerEXT.LogInfo == null)
@@ -291,6 +294,9 @@ namespace Microsoft.Xna.Framework
 		public delegate bool SupportsOrientationChangesFunc();
 		public static readonly SupportsOrientationChangesFunc SupportsOrientationChanges;
 
-		#endregion
-	}
+        public delegate void ExitGameFunc();
+        public static readonly ExitGameFunc ExitGame;
+
+        #endregion
+    }
 }

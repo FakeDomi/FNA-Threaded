@@ -82,6 +82,8 @@ namespace Microsoft.Xna.Framework
 			}
 		}
 
+        public bool IsApplyingGraphicsChanges { get; set; }
+
 		#endregion
 
 		#region Private Variables

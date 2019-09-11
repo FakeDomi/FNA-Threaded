@@ -21,6 +21,8 @@ namespace FNAGame
 
         private RenderTarget2D target;
 
+        private KeyboardState previousKeyboard = new KeyboardState();
+
         internal GameClass()
         {
             this.Window.AllowUserResizing = true;
@@ -64,13 +66,20 @@ namespace FNAGame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-                Keyboard.GetState().IsKeyDown(Keys.Escape))
+            KeyboardState previous = this.previousKeyboard;
+            KeyboardState current = Keyboard.GetState();
+            
+            if (KeyWentDown(previous, Keys.Escape, current))
             {
                 this.Exit();
             }
 
             base.Update(gameTime);
+
+            if (KeyWentDown(previous, Keys.Enter, current) & current.IsKeyDown(Keys.LeftAlt))
+            {
+                this.graphics.ToggleFullScreen();
+            }
 
             if (DateTime.Now.Second == this.currentSecond)
             {
@@ -84,6 +93,8 @@ namespace FNAGame
                 this.vFrames = 0;
                 this.currentSecond = DateTime.Now.Second;
             }
+
+            this.previousKeyboard = current;
         }
 
         /// <summary>
@@ -132,6 +143,11 @@ namespace FNAGame
             
             int width = (int)(widthRatio * windowHeight / heightRatio);
             return new Rectangle((windowWidth - width) / 2, 0, width, windowHeight);
+        }
+
+        private static bool KeyWentDown(KeyboardState previous, Keys key, KeyboardState current)
+        {
+            return previous.IsKeyUp(key) && current.IsKeyDown(key);
         }
     }
 }

@@ -113,6 +113,7 @@ namespace Microsoft.Xna.Framework
 		private bool useResizedBackBuffer;
 		private int resizedBackBufferWidth;
 		private int resizedBackBufferHeight;
+        private bool isApplyingChanges;
 
 		#endregion
 
@@ -224,6 +225,8 @@ namespace Microsoft.Xna.Framework
 			{
 				return;
 			}
+            
+            game.Window.IsApplyingGraphicsChanges = true;
 
 			// Recreate device information before resetting
 			GraphicsDeviceInformation gdi = new GraphicsDeviceInformation();
@@ -319,7 +322,9 @@ namespace Microsoft.Xna.Framework
 				gdi.PresentationParameters,
 				gdi.Adapter
 			);
-		}
+
+            game.Window.IsApplyingGraphicsChanges = false;
+        }
 
 		public void ToggleFullScreen()
 		{

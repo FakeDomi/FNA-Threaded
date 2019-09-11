@@ -184,6 +184,12 @@ namespace Microsoft.Xna.Framework
 			SDL.SDL_Quit();
 		}
 
+        public static void ExitGame()
+        {
+            SDL.SDL_Event evt = new SDL.SDL_Event { type = SDL.SDL_EventType.SDL_QUIT };
+            SDL.SDL_PushEvent(ref evt);
+        }
+
 		#endregion
 
 		#region Window Methods
@@ -866,15 +872,20 @@ namespace Microsoft.Xna.Framework
                     if (sdlEvent->type == SDL.SDL_EventType.SDL_WINDOWEVENT &&
                         sdlEvent->window.windowEvent == SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED)
                     {
-                        GameSubThread.Instance.ScheduleWait(() =>
+                        if (!game.Window.IsApplyingGraphicsChanges)
                         {
-                            ((FNAWindow) game.Window).INTERNAL_ClientSizeChanged();
-                            game.RedrawWindow();
-                        });
+                            GameSubThread.Instance.ScheduleWait(() =>
+                            {
+                                ((FNAWindow) game.Window).INTERNAL_ClientSizeChanged();
+                                
+                                // Enabling this allows the window contents to adapt to the new size more quickly, but it may cause flickering.
+                                // game.RedrawWindow();
+                            });
+                        }
                     }
 
                     return 0;
-                }, game.Window.Handle); 
+                }, game.Window.Handle);
             }
 
 			SDL.SDL_Event evt;
@@ -904,6 +915,8 @@ namespace Microsoft.Xna.Framework
 								TextInputEXT.OnTextInput(textInputCharacters[6]);
 								textInputSuppress = true;
 							}
+                            
+                            Keyboard.SetKeys(keys);
 						}
 					}
 					else if (evt.type == SDL.SDL_EventType.SDL_KEYUP)
@@ -921,6 +934,8 @@ namespace Microsoft.Xna.Framework
 								textInputControlDown[6] = false;
 								textInputSuppress = false;
 							}
+                            
+                            Keyboard.SetKeys(keys);
 						}
 					}
 
@@ -984,12 +999,20 @@ namespace Microsoft.Xna.Framework
 							if (!osxUseSpaces)
 							{
 								// If we alt-tab away, we lose the 'fullscreen desktop' flag on some WMs
-								SDL.SDL_SetWindowFullscreen(
-									game.Window.Handle,
-									game.GraphicsDevice.PresentationParameters.IsFullScreen ?
-										(uint) SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP :
-										0
-								);
+                                if (game.GraphicsDevice.PresentationParameters.IsFullScreen)
+                                {
+                                    game.Window.IsApplyingGraphicsChanges = true;
+
+                                    GameSubThread.Instance.ScheduleWait(() =>
+                                    {
+                                        SDL.SDL_SetWindowFullscreen(
+                                            game.Window.Handle,
+                                            game.GraphicsDevice.PresentationParameters.IsFullScreen
+                                                ? (uint) SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP
+                                                : 0
+                                        );
+                                    });
+                                }
 							}
 
 							// Disable the screensaver when we're back.
@@ -1000,9 +1023,17 @@ namespace Microsoft.Xna.Framework
 							game.IsActive = false;
 
 							if (!osxUseSpaces)
-							{
-								SDL.SDL_SetWindowFullscreen(game.Window.Handle, 0);
-							}
+                            {
+                                if (game.GraphicsDevice.PresentationParameters.IsFullScreen)
+                                {
+                                    game.Window.IsApplyingGraphicsChanges = true;
+
+                                    GameSubThread.Instance.ScheduleWait(() =>
+                                    {
+                                        SDL.SDL_SetWindowFullscreen(game.Window.Handle, 0);
+                                    });
+                                }
+                            }
 
 							// Give the screensaver back, we're not that important now.
 							SDL.SDL_EnableScreenSaver();
@@ -1144,7 +1175,6 @@ namespace Microsoft.Xna.Framework
 					}
 				}
 
-				Keyboard.SetKeys(keys);
 				//game.Tick();
 			}
 

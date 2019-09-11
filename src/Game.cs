@@ -17,6 +17,8 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
+using SDL2;
+
 #endregion
 
 namespace Microsoft.Xna.Framework
@@ -341,6 +343,8 @@ namespace Microsoft.Xna.Framework
 		{
 			RunApplication = false;
 			suppressDraw = true;
+
+            SDL2_FNAPlatform.ExitGame();
 		}
 
 		public void ResetElapsedTime()

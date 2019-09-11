@@ -64,6 +64,7 @@ namespace Microsoft.Xna.Framework
                 while (!scheduledTasks.IsEmpty)
                 {
                     scheduledTasks.TryDequeue(out var result);
+
                     result.Item1.Invoke();
                     result.Item2.Set();
                 }
